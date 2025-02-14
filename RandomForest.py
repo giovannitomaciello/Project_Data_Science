@@ -7,8 +7,6 @@ from sklearn.datasets import fetch_covtype
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
-from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
 from sklearn.metrics import confusion_matrix
 
 # Load the dataset
@@ -18,39 +16,57 @@ X, y = data.data, data.target
 # Split the dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
+# Define the resampling strategies
+SMOTE = True
+UnderSampler = True
+PCA = True
+PCA_SMOTE = True
+
 # Load the sampled datasets
-df_SMOTE= pd.read_parquet("dataset_SMOTE.parquet")
-X_SMOTE = df_SMOTE.drop(columns=['target'])
-y_SMOTE = df_SMOTE['target']
+if SMOTE==True:
+    df_SMOTE= pd.read_parquet("dataset_SMOTE.parquet")
+    X_SMOTE = df_SMOTE.drop(columns=['target'])
+    y_SMOTE = df_SMOTE['target']
 
-df_UnderSampler= pd.read_parquet("dataset_UnderSampler.parquet")
-X_UnderSampler = df_UnderSampler.drop(columns=['target'])
-y_UnderSampler = df_UnderSampler['target']
+if UnderSampler == True:
+    df_UnderSampler= pd.read_parquet("dataset_underSampler.parquet")
+    X_UnderSampler = df_UnderSampler.drop(columns=['target'])
+    y_UnderSampler = df_UnderSampler['target']
 
-df_PCA= pd.read_parquet("dataset_PCA.parquet")
-X_PCA = df_PCA.drop(columns=['target'])
-y_PCA = df_PCA['target']
+if PCA == True:
+    df_PCA= pd.read_parquet("dataset_PCA.parquet")
+    X_PCA = df_PCA.drop(columns=['target'])
+    y_PCA = df_PCA['target']
+    
+    df_test_PCA= pd.read_parquet("datatest_PCA.parquet")
+    X_test_PCA = df_test_PCA.drop(columns=['target'])
+    y_test_PCA = df_test_PCA['target']
 
-df_test_PCA= pd.read_parquet("datatest_PCA.parquet")
-X_test_PCA = df_test_PCA.drop(columns=['target'])
-y_test_PCA = df_test_PCA['target']
+if PCA_SMOTE == True:   
+    df_PCA_SMOTE= pd.read_parquet("dataset_PCA_SMOTE.parquet")
+    X_PCA_SMOTE = df_PCA_SMOTE.drop(columns=['target'])
+    y_PCA_SMOTE = df_PCA_SMOTE['target']
 
-df_PCA_SMOTE= pd.read_parquet("dataset_PCA_SMOTE.parquet")
-X_PCA_SMOTE = df_PCA_SMOTE.drop(columns=['target'])
-y_PCA_SMOTE = df_PCA_SMOTE['target']
-
-df_test_PCA_SMOTE= pd.read_parquet("datatest_PCA_SMOTE.parquet")
-X_test_PCA_SMOTE = df_test_PCA_SMOTE.drop(columns=['target'])
-y_test_PCA_SMOTE = df_test_PCA_SMOTE['target']
+    df_test_PCA_SMOTE= pd.read_parquet("datatest_PCA_SMOTE.parquet")
+    X_test_PCA_SMOTE = df_test_PCA_SMOTE.drop(columns=['target'])
+    y_test_PCA_SMOTE = df_test_PCA_SMOTE['target']
 
 # Define the resampling strategies
 strategies = {
-    "Baseline (No Resampling)": (X_train, y_train),
-    "Oversampling (SMOTE)": (X_SMOTE, y_SMOTE),
-    "Undersampling (Random)": (X_UnderSampler, y_UnderSampler),
-    "PCA": (X_PCA, y_PCA),
-    "PCA+SMOTE": (X_PCA_SMOTE,y_PCA_SMOTE)
+    "Baseline (No Resampling)": (X_train, y_train)
 }
+
+if SMOTE==True:
+    strategies["Oversampling (SMOTE)"] = (X_SMOTE, y_SMOTE)
+
+if UnderSampler==True:
+    strategies["Undersampling (Random)"] = (X_UnderSampler, y_UnderSampler)
+
+if PCA==True:
+    strategies["PCA"] = (X_PCA, y_PCA)
+
+if PCA_SMOTE==True:
+    strategies["PCA+SMOTE"] = (X_PCA_SMOTE, y_PCA_SMOTE)
 
 # Train and evaluate the Random Forest model for each resampling strategy
 import time
